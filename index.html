@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Marshmallow Tower Lab — Build. Test. Iterate." />
+    <title>Marshmallow Tower Lab</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <canvas id="three-canvas"></canvas>
+
+    <div id="ui-root">
+      <div id="sidebar" aria-label="Supplies">
+        <div class="ui-kicker">A TINY BUILDING EXPERIMENT</div>
+        <div class="ui-title">Marshmallow Tower Lab.</div>
+        <div class="ui-subhint">Hold <kbd>Shift</kbd> and drag a joint to move its whole structure.</div>
+
+        <div class="ui-section">YOUR SUPPLIES</div>
+
+        <div class="material-row" id="spaghetti-row" data-tool="spaghetti" data-clickable>
+          <div class="row-top">
+            <div class="row-left">🍝 <span class="row-name">Spaghetti sticks</span></div>
+            <div class="row-right" id="spaghetti-count">20 / 20</div>
+          </div>
+          <div class="row-bar"><div class="row-fill" id="spaghetti-bar"></div></div>
+        </div>
+
+        <div class="material-row" id="string-row" data-tool="string" data-clickable>
+          <div class="row-top">
+            <div class="row-left">🧵 <span class="row-name">String</span></div>
+            <div class="row-right" id="string-count">36" / 36"</div>
+          </div>
+          <div class="row-bar"><div class="row-fill" id="string-bar"></div></div>
+        </div>
+
+        <div class="material-row" id="tape-row" data-tool="tape" data-clickable>
+          <div class="row-top">
+            <div class="row-left">🖊 <span class="row-name">Tape</span></div>
+            <div class="row-right" id="tape-count">36" / 36"</div>
+          </div>
+          <div class="row-bar"><div class="row-fill" id="tape-bar"></div></div>
+        </div>
+
+        <div class="material-row" id="joints-row" data-tool="joint" data-clickable>
+          <div class="row-top">
+            <div class="row-left">◆ <span class="row-name">Joints</span></div>
+            <div class="row-right" id="joints-count">12 / 12</div>
+          </div>
+          <div class="row-bar"><div class="row-fill" id="joints-bar"></div></div>
+        </div>
+
+        <div class="material-row" id="crown-row" data-tool="crown" data-clickable>
+          <div class="row-top">
+            <div class="row-left">☁️ <span class="row-name">Marshmallow</span></div>
+            <div class="row-right" id="crown-count">1 / 1</div>
+          </div>
+          <div class="row-bar"><div class="row-fill" id="crown-bar"></div></div>
+        </div>
+        <div class="crown-hint" id="crown-hint">The load: place on a joint — it snaps to the top</div>
+
+        <div class="sidebar-hint" id="sidebar-hint">Click a supply, then click the build area.</div>
+      </div>
+
+      <div id="timer-bar" aria-label="Timer">
+        <button id="timer-display" type="button"><span id="timer-text">18:00</span></button>
+      </div>
+
+      <button id="sound-toggle" type="button" aria-pressed="true" aria-label="Toggle sound">
+        <span class="sound-icon" id="sound-icon">🔊</span>
+        <span class="sound-bars" aria-hidden="true">
+          <span class="bar b1"></span>
+          <span class="bar b2"></span>
+          <span class="bar b3"></span>
+        </span>
+        <span class="sound-label">Sound</span>
+        <span class="sound-tooltip hidden" id="sound-tooltip">Sound on</span>
+      </button>
+
+      <div id="bottom-bar" aria-label="Controls">
+        <button id="undo-btn" type="button" class="history-btn" aria-label="Undo" disabled>← Undo</button>
+        <button id="redo-btn" type="button" class="history-btn" aria-label="Redo" disabled>Redo →</button>
+        <button id="reset-btn" type="button">Reset</button>
+        <button id="test-tower-btn" type="button" disabled>Test Tower</button>
+      </div>
+
+      <div id="height-ruler" aria-hidden="true">
+        <div class="ruler-line"></div>
+        <div class="ruler-ticks" id="ruler-ticks"></div>
+        <div class="ruler-dot" id="ruler-dot"></div>
+      </div>
+    </div>
+
+    <div id="result-overlay" class="hidden" aria-hidden="true">
+      <div class="result-card" role="dialog" aria-modal="true" aria-label="Result">
+        <div class="result-band" id="result-band">STANDING</div>
+        <div class="result-height" id="result-height">Your tower reached 0.0 cm</div>
+        <div class="result-compare" id="result-compare">Kindergarteners average 27cm 👀</div>
+        <div class="result-flavor" id="result-flavor"></div>
+        <button class="result-try" id="result-try" type="button">Try Again</button>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
