@@ -1,0 +1,123 @@
+.mtl-stage-wrap {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 0;
+  min-height: 520px;
+}
+
+.mtl-canvas-host {
+  position: relative;
+  min-height: 480px;
+  background: radial-gradient(900px 520px at 50% 42%, #faf7f2 0%, #e4dcd2 55%, #dcd4ca 100%);
+}
+
+.mtl-panel {
+  padding: 1.25rem 1.25rem 2rem;
+  background: var(--paper);
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.mtl-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.mtl-stat strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.mtl-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink);
+  min-height: 3.2em;
+}
+
+.mtl-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mtl-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.mtl-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(42, 39, 35, 0.08);
+}
+
+.mtl-btn.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+.mtl-btn.ghost {
+  background: transparent;
+}
+
+.mtl-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 27, 24, 0.42);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  backdrop-filter: blur(6px);
+}
+
+.mtl-overlay.hidden {
+  display: none;
+}
+
+.mtl-overlay-card {
+  max-width: 420px;
+  padding: 1.75rem;
+  background: var(--paper);
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(30, 27, 24, 0.25);
+}
+
+.mtl-overlay-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+}
+
+.mtl-overlay-card p {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 920px) {
+  .mtl-stage-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .mtl-panel {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+}
