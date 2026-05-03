@@ -48,6 +48,47 @@ export function getNearestSlotAlongRay(grid, ray, maxPerpDist = 0.48, maxRayT = 
   return best
 }
 
+/**
+ * Like {@link getNearestSlotAlongRay}, but only considers slots where a joint may be placed
+ * (ground tier or supported higher tiers). Prevents “dead clicks” when the raw nearest slot is
+ * floating in mid-air without supports.
+ */
+export function getNearestValidJointSlotAlongRay(grid, ray, maxPerpDist = 0.58, maxRayT = 80) {
+  const o = ray.origin
+  const d = ray.direction
+  const dLen = d.length()
+  if (dLen < 1e-8) return null
+  const inv = 1 / dLen
+  const dx = d.x * inv
+  const dy = d.y * inv
+  const dz = d.z * inv
+
+  let best = null
+  let bestPerp = Infinity
+
+  for (const s of grid.slots) {
+    const opx = s.position.x - o.x
+    const opy = s.position.y - o.y
+    const opz = s.position.z - o.z
+    const t = opx * dx + opy * dy + opz * dz
+    if (t < 0 || t > maxRayT) continue
+
+    const cx = o.x + dx * t
+    const cy = o.y + dy * t
+    const cz = o.z + dz * t
+    const perp = Math.hypot(s.position.x - cx, s.position.y - cy, s.position.z - cz)
+
+    if (perp >= maxPerpDist) continue
+    if (!isValidJointPlacement(grid, s)) continue
+    if (perp < bestPerp) {
+      bestPerp = perp
+      best = s
+    }
+  }
+
+  return best
+}
+
 /** Count occupied joints on the level below in (x,z) and 4-neighbors (same y-1). */
 export function countSupportsBelow(grid, slot) {
   if (slot.y <= 0) return 2

@@ -3,7 +3,7 @@ import { buildJoint, buildBigMarshmallow, buildTapeWrap, getCrownOffsetY } from 
 import { getConnectedStructure } from './connections.js'
 import { createShiftKeyTracker } from './input.js'
 import {
-  getNearestSlotAlongRay,
+  getNearestValidJointSlotAlongRay,
   getStackTargetBottomWorldY,
   isValidJointPlacement,
   parseSlotId,
@@ -935,7 +935,7 @@ export function createBuilder({
 
     if (state.activeTool === 'joint') {
       setRayFromEvent(e)
-      const slot = getNearestSlotAlongRay(grid, raycaster.ray)
+      const slot = getNearestValidJointSlotAlongRay(grid, raycaster.ray)
       if (!slot) {
         ghostNode.visible = false
         return
@@ -1076,8 +1076,12 @@ export function createBuilder({
   function handleToolClick(e) {
     if (state.activeTool === 'joint') {
       setRayFromEvent(e)
-      const slot = getNearestSlotAlongRay(grid, raycaster.ray)
-      if (!slot) return
+      const slot = getNearestValidJointSlotAlongRay(grid, raycaster.ray)
+      if (!slot) {
+        onHint('Aim at the round build pad and tap. First joints sit on the table; higher ones need support below.')
+        audio?.playInvalidAction?.()
+        return
+      }
       placeNodeAtSlot(slot)
       return
     }

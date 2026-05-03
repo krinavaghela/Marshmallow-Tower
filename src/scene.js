@@ -83,6 +83,18 @@ function resize(renderer, camera) {
 function createPlatform() {
   const g = new THREE.Group()
 
+  // Visible build mat so the 3D area reads as a “table” (not empty beige).
+  const matTop = new THREE.MeshStandardMaterial({
+    color: 0xe4dcd0,
+    roughness: 0.92,
+    metalness: 0,
+  })
+  const buildPad = new THREE.Mesh(new THREE.CircleGeometry(2.85, 72), matTop)
+  buildPad.rotation.x = -Math.PI / 2
+  buildPad.position.y = 0.002
+  buildPad.receiveShadow = true
+  g.add(buildPad)
+
   // Clean workspace: subtle shadow only (no grid lines / patterns)
   const shadowCatcher = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.ShadowMaterial({ opacity: 0.18 }))
   shadowCatcher.rotation.x = -Math.PI / 2

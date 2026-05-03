@@ -36,7 +36,7 @@ function hintForTool(tool) {
           ? 'Click a joint to tape it.'
           : tool === 'crown'
             ? 'Click the build area — the marshmallow snaps to the highest joint (the load).'
-            : 'Click the build area to place a joint.',
+            : 'Tap the round build pad to place joints (table first, then stack with support).',
   )
 }
 
