@@ -470,8 +470,15 @@ export function createBuilder({
 
   function syncOrbitWithTool() {
     if (!controls) return
-    // Left-drag rotates by default; that steals clicks from placement. Disable rotate while building.
-    controls.enableRotate = !state.activeTool
+    // OrbitControls calls setPointerCapture on pointerdown *before* it knows rotation is disabled.
+    // That still interferes with placement. Turn controls off entirely while a tool is active.
+    const building = Boolean(state.activeTool)
+    controls.enabled = !building
+    if (!building) {
+      controls.enableRotate = true
+      controls.enablePan = true
+      controls.enableZoom = true
+    }
   }
 
   function setTool(tool) {
@@ -1207,7 +1214,12 @@ export function createBuilder({
     canvas.removeEventListener('dragover', onCanvasDragOver)
     canvas.removeEventListener('drop', onCanvasDrop)
     window.removeEventListener('keydown', onKeyDown)
-    if (controls) controls.enableRotate = true
+    if (controls) {
+      controls.enabled = true
+      controls.enableRotate = true
+      controls.enablePan = true
+      controls.enableZoom = true
+    }
     scene.remove(groundPlane)
     root.remove(nodesGroup, edgesGroup, wrapsGroup, crownGroup, ghostNode, ghostCrown, ghostLine)
   }

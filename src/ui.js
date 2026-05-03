@@ -80,7 +80,8 @@ export function createUI(doc) {
     for (const row of els.rows) {
       row.classList.toggle('active', row.dataset.tool === tool)
     }
-    if (!tool) setHint('Pick a supply, then tap the round build pad (or drag a supply onto it).')
+    if (!tool)
+      setHint('Pick a supply, tap the round pad to build. Esc clears the tool; then drag to orbit.')
   }
 
   function setInventory(snapshot) {

@@ -24,7 +24,7 @@ ui.initRuler({ maxCm: 50, stepCm: 5 })
 
 function hintForTool(tool) {
   if (!tool) {
-    ui.setHint('Click or drag a supply onto the build area, then click to place. Drag with nothing selected to orbit.')
+    ui.setHint('Pick a supply, tap the round pad to build. Press Esc to clear the tool and drag to orbit the view.')
     return
   }
   ui.setHint(
