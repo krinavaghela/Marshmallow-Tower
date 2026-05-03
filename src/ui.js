@@ -80,7 +80,7 @@ export function createUI(doc) {
     for (const row of els.rows) {
       row.classList.toggle('active', row.dataset.tool === tool)
     }
-    if (!tool) setHint('Click a supply, then click the build area.')
+    if (!tool) setHint('Click or drag a supply onto the build area.')
   }
 
   function setInventory(snapshot) {
@@ -202,6 +202,17 @@ export function createUI(doc) {
 
   function wire() {
     for (const row of els.rows) {
+      row.setAttribute('draggable', 'true')
+      row.style.cursor = 'grab'
+      row.addEventListener('dragstart', (e) => {
+        if (row.classList.contains('depleted')) {
+          e.preventDefault()
+          return
+        }
+        e.dataTransfer.setData('application/x-mt-tool', row.dataset.tool)
+        e.dataTransfer.setData('text/plain', row.dataset.tool)
+        e.dataTransfer.effectAllowed = 'copy'
+      })
       row.addEventListener('click', (e) => {
         e.stopPropagation()
         const tool = row.dataset.tool

@@ -22,6 +22,24 @@ const animator = createAnimator({ root, mats, platform, audio })
 
 ui.initRuler({ maxCm: 50, stepCm: 5 })
 
+function hintForTool(tool) {
+  if (!tool) {
+    ui.setHint('Click or drag a supply onto the build area, then click to place. Drag with nothing selected to orbit.')
+    return
+  }
+  ui.setHint(
+    tool === 'spaghetti'
+      ? 'Click two joints to place a spaghetti stick (or drop supply on canvas, then tap two joints).'
+      : tool === 'string'
+        ? 'Click two joints to add a string brace.'
+        : tool === 'tape'
+          ? 'Click a joint to tape it.'
+          : tool === 'crown'
+            ? 'Click the build area — the marshmallow snaps to the highest joint (the load).'
+            : 'Click the build area to place a joint.',
+  )
+}
+
 const builder = createBuilder({
   scene,
   camera,
@@ -34,6 +52,8 @@ const builder = createBuilder({
   onHint: (text) => ui.setHint(text),
   onChange: syncUI,
   history,
+  controls,
+  onActiveToolChange: hintForTool,
 })
 
 history.subscribe(() => {
@@ -72,19 +92,7 @@ function resetAll() {
 }
 
 ui.onToolSelect((tool) => {
-  // Tool keys from DOM: spaghetti|string|tape|joint|crown
   builder.setTool(tool)
-  ui.setHint(
-    tool === 'spaghetti'
-      ? 'Click two joints to place a spaghetti stick.'
-      : tool === 'string'
-        ? 'Click two joints to add a string brace.'
-        : tool === 'tape'
-          ? 'Click a joint to tape it.'
-          : tool === 'crown'
-            ? 'Click a joint — the marshmallow snaps to the highest one (the load).'
-        : 'Click the build area to place a joint.',
-  )
   syncUI()
 })
 
@@ -128,7 +136,7 @@ ui.onTest(() => {
 
 // Initial UI state
 resetAll()
-ui.setHint('Click a supply, then click the build area.')
+hintForTool(null)
 syncUI()
 
 function frame() {

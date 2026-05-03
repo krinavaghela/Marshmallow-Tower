@@ -56,6 +56,10 @@ export function createBuilder({
   onHint = () => {},
   onChange = () => {},
   history = null,
+  /** When set, orbit rotation is turned off while a build tool is active so left-click places reliably. */
+  controls = null,
+  /** Fired after every tool change (including `null` when clearing). Use for HUD hints. */
+  onActiveToolChange = null,
 }) {
   if (!scene || !camera || !renderer || !root || !mats || !grid || !inventory) {
     throw new Error('createBuilder: missing required args.')
@@ -464,6 +468,12 @@ export function createBuilder({
     }
   }
 
+  function syncOrbitWithTool() {
+    if (!controls) return
+    // Left-drag rotates by default; that steals clicks from placement. Disable rotate while building.
+    controls.enableRotate = !state.activeTool
+  }
+
   function setTool(tool) {
     clearNodeSelection()
     state.activeTool = tool
@@ -473,7 +483,9 @@ export function createBuilder({
     ghostLine.visible = false
     ghostNode.visible = tool === 'joint'
     ghostCrown.visible = tool === 'crown'
+    syncOrbitWithTool()
     onChange()
+    onActiveToolChange?.(tool)
   }
 
   function cancelToolSelection() {
@@ -1027,7 +1039,9 @@ export function createBuilder({
     if (pointerDown && (e.buttons & 1)) {
       const dx = e.clientX - pointerDown.x
       const dy = e.clientY - pointerDown.y
-      if (dx * dx + dy * dy > CLICK_DRAG_THRESHOLD_PX * CLICK_DRAG_THRESHOLD_PX) pointerDown.dragged = true
+      // While a tool is active, camera rotation is off — don't treat small moves as "drag" so taps still place.
+      const threshold = state.activeTool ? CLICK_DRAG_THRESHOLD_PX * 3 : CLICK_DRAG_THRESHOLD_PX
+      if (dx * dx + dy * dy > threshold * threshold) pointerDown.dragged = true
     }
   }
 
@@ -1132,15 +1146,34 @@ export function createBuilder({
     }
   }
 
+  function onCanvasDragOver(e) {
+    e.preventDefault()
+    try {
+      e.dataTransfer.dropEffect = 'copy'
+    } catch (_) {}
+  }
+
+  function onCanvasDrop(e) {
+    e.preventDefault()
+    const tool = e.dataTransfer?.getData('application/x-mt-tool') || e.dataTransfer?.getData('text/plain')
+    if (!tool || !['joint', 'spaghetti', 'string', 'tape', 'crown'].includes(tool)) return
+    setTool(tool)
+    handleToolClick(e)
+  }
+
   canvas.addEventListener('pointermove', onMove, { passive: true })
   canvas.addEventListener('pointerdown', onPointerDown)
   canvas.addEventListener('pointerup', onPointerUp)
+  canvas.addEventListener('dragover', onCanvasDragOver)
+  canvas.addEventListener('drop', onCanvasDrop)
   canvas.addEventListener('pointercancel', () => {
     if (structureDrag) cancelStructureDrag()
     pointerDown = null
   })
   canvas.addEventListener('contextmenu', (e) => e.preventDefault())
   window.addEventListener('keydown', onKeyDown)
+
+  syncOrbitWithTool()
 
   function getPlacedNodes() {
     return nodes.map((n) => ({ id: n.id, mesh: n.mesh, obj: n.mesh, taped: n.taped }))
@@ -1167,7 +1200,10 @@ export function createBuilder({
     canvas.removeEventListener('pointermove', onMove)
     canvas.removeEventListener('pointerdown', onPointerDown)
     canvas.removeEventListener('pointerup', onPointerUp)
+    canvas.removeEventListener('dragover', onCanvasDragOver)
+    canvas.removeEventListener('drop', onCanvasDrop)
     window.removeEventListener('keydown', onKeyDown)
+    if (controls) controls.enableRotate = true
     scene.remove(groundPlane)
     root.remove(nodesGroup, edgesGroup, wrapsGroup, crownGroup, ghostNode, ghostCrown, ghostLine)
   }
@@ -1208,6 +1244,7 @@ export function createBuilder({
       ghostCrown.visible = false
       ghostLine.visible = false
       canvas.style.cursor = 'default'
+      syncOrbitWithTool()
       onChange()
     },
     update(opts = {}) {
