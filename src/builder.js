@@ -1169,7 +1169,9 @@ export function createBuilder({
     const tool = e.dataTransfer?.getData('application/x-mt-tool') || e.dataTransfer?.getData('text/plain')
     if (!tool || !['joint', 'spaghetti', 'string', 'tape', 'crown'].includes(tool)) return
     setTool(tool)
-    handleToolClick(e)
+    // Only some tools make sense to "apply" immediately on drop.
+    // For connectors (spaghetti/string/tape), drop should just select the tool.
+    if (tool === 'joint' || tool === 'crown') handleToolClick(e)
   }
 
   function onSyntheticToolDrop(e) {
@@ -1179,7 +1181,8 @@ export function createBuilder({
     if (!tool || !['joint', 'spaghetti', 'string', 'tape', 'crown'].includes(tool)) return
     if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return
     setTool(tool)
-    handleToolClick({ clientX, clientY })
+    // See onCanvasDrop: only apply joint/crown immediately.
+    if (tool === 'joint' || tool === 'crown') handleToolClick({ clientX, clientY })
   }
 
   canvas.addEventListener('pointermove', onMove, { passive: true })
