@@ -1172,6 +1172,16 @@ export function createBuilder({
     handleToolClick(e)
   }
 
+  function onSyntheticToolDrop(e) {
+    const tool = e?.detail?.tool
+    const clientX = e?.detail?.clientX
+    const clientY = e?.detail?.clientY
+    if (!tool || !['joint', 'spaghetti', 'string', 'tape', 'crown'].includes(tool)) return
+    if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return
+    setTool(tool)
+    handleToolClick({ clientX, clientY })
+  }
+
   canvas.addEventListener('pointermove', onMove, { passive: true })
   canvas.addEventListener('pointerdown', onPointerDown)
   canvas.addEventListener('pointerup', onPointerUp)
@@ -1183,6 +1193,7 @@ export function createBuilder({
   })
   canvas.addEventListener('contextmenu', (e) => e.preventDefault())
   window.addEventListener('keydown', onKeyDown)
+  document.addEventListener('mt:tool-drop', onSyntheticToolDrop)
 
   syncOrbitWithTool()
 
@@ -1214,6 +1225,7 @@ export function createBuilder({
     canvas.removeEventListener('dragover', onCanvasDragOver)
     canvas.removeEventListener('drop', onCanvasDrop)
     window.removeEventListener('keydown', onKeyDown)
+    document.removeEventListener('mt:tool-drop', onSyntheticToolDrop)
     if (controls) {
       controls.enabled = true
       controls.enableRotate = true

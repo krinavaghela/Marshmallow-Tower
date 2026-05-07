@@ -23,6 +23,7 @@ export function createUI(doc) {
     rows: [...doc.querySelectorAll('.material-row[data-tool]')],
     crownRow: doc.getElementById('crown-row'),
     crownHint: doc.getElementById('crown-hint'),
+    canvas: doc.getElementById('three-canvas'),
 
     // inventory counters/bars
     counts: {
@@ -71,6 +72,98 @@ export function createUI(doc) {
   let onToggleSound = () => {}
   let onUndo = () => {}
   let onRedo = () => {}
+
+  // Pointer-based drag fallback (works on mobile + when HTML drag fails).
+  const pointerDrag = {
+    active: false,
+    tool: null,
+    pointerId: null,
+    moved: false,
+    startX: 0,
+    startY: 0,
+    ghost: null,
+  }
+
+  function ensureDragGhost() {
+    if (pointerDrag.ghost) return pointerDrag.ghost
+    const el = doc.createElement('div')
+    el.style.position = 'fixed'
+    el.style.left = '0px'
+    el.style.top = '0px'
+    el.style.transform = 'translate(-9999px, -9999px)'
+    el.style.zIndex = '9999'
+    el.style.pointerEvents = 'none'
+    el.style.padding = '10px 12px'
+    el.style.borderRadius = '12px'
+    el.style.background = 'rgba(255,255,255,0.85)'
+    el.style.border = '1px solid rgba(0,0,0,0.12)'
+    el.style.boxShadow = '0 12px 30px rgba(0,0,0,0.12)'
+    el.style.backdropFilter = 'blur(12px) saturate(180%)'
+    el.style.webkitBackdropFilter = 'blur(12px) saturate(180%)'
+    el.style.fontSize = '13px'
+    el.style.fontWeight = '600'
+    el.style.color = '#1C1714'
+    el.style.whiteSpace = 'nowrap'
+    doc.body.appendChild(el)
+    pointerDrag.ghost = el
+    return el
+  }
+
+  function toolLabel(tool) {
+    if (tool === 'spaghetti') return '🍝 Spaghetti'
+    if (tool === 'string') return '🧵 String'
+    if (tool === 'tape') return '🖊 Tape'
+    if (tool === 'joint') return '◆ Joints'
+    if (tool === 'crown') return '☁️ Marshmallow'
+    return tool || ''
+  }
+
+  function startPointerDrag(tool, e) {
+    if (!tool) return
+    pointerDrag.active = true
+    pointerDrag.tool = tool
+    pointerDrag.pointerId = e.pointerId
+    pointerDrag.moved = false
+    pointerDrag.startX = e.clientX
+    pointerDrag.startY = e.clientY
+    const ghost = ensureDragGhost()
+    ghost.textContent = toolLabel(tool)
+    ghost.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 12}px)`
+    try {
+      e.currentTarget?.setPointerCapture?.(e.pointerId)
+    } catch {}
+  }
+
+  function updatePointerDrag(e) {
+    if (!pointerDrag.active || e.pointerId !== pointerDrag.pointerId) return
+    const dx = e.clientX - pointerDrag.startX
+    const dy = e.clientY - pointerDrag.startY
+    if (!pointerDrag.moved && dx * dx + dy * dy > 36) pointerDrag.moved = true
+    pointerDrag.ghost?.style && (pointerDrag.ghost.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 12}px)`)
+  }
+
+  function finishPointerDrag(e) {
+    if (!pointerDrag.active || e.pointerId !== pointerDrag.pointerId) return
+    pointerDrag.active = false
+    pointerDrag.pointerId = null
+    if (pointerDrag.ghost) pointerDrag.ghost.style.transform = 'translate(-9999px, -9999px)'
+
+    // If it was basically a tap, let the click handler select the tool.
+    if (!pointerDrag.moved) return
+
+    // If dropped over the canvas, dispatch a synthetic drop event for builder.
+    const canvas = els.canvas
+    if (!canvas) return
+    const r = canvas.getBoundingClientRect()
+    const overCanvas = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom
+    if (!overCanvas) return
+
+    doc.dispatchEvent(
+      new CustomEvent('mt:tool-drop', {
+        detail: { tool: pointerDrag.tool, clientX: e.clientX, clientY: e.clientY },
+      }),
+    )
+  }
 
   function setHint(text) {
     if (els.hint) els.hint.textContent = text
@@ -214,6 +307,15 @@ export function createUI(doc) {
         e.dataTransfer.setData('text/plain', row.dataset.tool)
         e.dataTransfer.effectAllowed = 'copy'
       })
+      row.addEventListener('pointerdown', (e) => {
+        if (row.classList.contains('depleted')) return
+        // Right/middle click: ignore.
+        if (typeof e.button === 'number' && e.button !== 0) return
+        startPointerDrag(row.dataset.tool, e)
+      })
+      row.addEventListener('pointermove', (e) => updatePointerDrag(e))
+      row.addEventListener('pointerup', (e) => finishPointerDrag(e))
+      row.addEventListener('pointercancel', (e) => finishPointerDrag(e))
       row.addEventListener('click', (e) => {
         e.stopPropagation()
         const tool = row.dataset.tool
