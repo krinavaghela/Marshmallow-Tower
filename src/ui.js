@@ -311,11 +311,66 @@ export function createUI(doc) {
         if (row.classList.contains('depleted')) return
         // Right/middle click: ignore.
         if (typeof e.button === 'number' && e.button !== 0) return
+        // Make pointer drag reliable across browsers (avoid scroll/gesture interference).
+        e.preventDefault?.()
         startPointerDrag(row.dataset.tool, e)
       })
-      row.addEventListener('pointermove', (e) => updatePointerDrag(e))
-      row.addEventListener('pointerup', (e) => finishPointerDrag(e))
-      row.addEventListener('pointercancel', (e) => finishPointerDrag(e))
+      row.addEventListener('pointermove', (e) => {
+        if (pointerDrag.active) e.preventDefault?.()
+        updatePointerDrag(e)
+      })
+      row.addEventListener('pointerup', (e) => {
+        if (pointerDrag.active) e.preventDefault?.()
+        finishPointerDrag(e)
+      })
+      row.addEventListener('pointercancel', (e) => {
+        if (pointerDrag.active) e.preventDefault?.()
+        finishPointerDrag(e)
+      })
+
+      // Extra fallback for iOS Safari where Pointer Events can be flaky in some configurations.
+      row.addEventListener(
+        'touchstart',
+        (e) => {
+          if (row.classList.contains('depleted')) return
+          const t = e.changedTouches?.[0]
+          if (!t) return
+          e.preventDefault()
+          startPointerDrag(row.dataset.tool, { pointerId: 1, clientX: t.clientX, clientY: t.clientY, currentTarget: row })
+        },
+        { passive: false },
+      )
+      row.addEventListener(
+        'touchmove',
+        (e) => {
+          if (!pointerDrag.active) return
+          const t = e.changedTouches?.[0]
+          if (!t) return
+          e.preventDefault()
+          updatePointerDrag({ pointerId: 1, clientX: t.clientX, clientY: t.clientY })
+        },
+        { passive: false },
+      )
+      row.addEventListener(
+        'touchend',
+        (e) => {
+          if (!pointerDrag.active) return
+          const t = e.changedTouches?.[0]
+          if (!t) return
+          e.preventDefault()
+          finishPointerDrag({ pointerId: 1, clientX: t.clientX, clientY: t.clientY })
+        },
+        { passive: false },
+      )
+      row.addEventListener(
+        'touchcancel',
+        (e) => {
+          if (!pointerDrag.active) return
+          e.preventDefault()
+          finishPointerDrag({ pointerId: 1, clientX: pointerDrag.startX, clientY: pointerDrag.startY })
+        },
+        { passive: false },
+      )
       row.addEventListener('click', (e) => {
         e.stopPropagation()
         const tool = row.dataset.tool
