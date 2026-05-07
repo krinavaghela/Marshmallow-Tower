@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { THREE } from './three-deps.js'
 
 export function createMaterials() {
   // Soft load marshmallow: compact capsule (still reads as load vs joints)

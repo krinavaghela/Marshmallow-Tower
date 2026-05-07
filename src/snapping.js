@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { THREE } from './three-deps.js'
 
 export function parseSlotId(slotId) {
   if (typeof slotId !== 'string') return null

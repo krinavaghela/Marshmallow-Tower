@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { THREE } from './three-deps.js'
 
 export function createGrid({ size = 10, levels = 7, spacing = 0.48, baseY = 0.06 } = {}) {
   const slots = []

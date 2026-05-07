@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { THREE } from './three-deps.js'
 import { buildJoint, buildBigMarshmallow, buildTapeWrap, getCrownOffsetY } from './materials.js'
 import { getConnectedStructure } from './connections.js'
 import { createShiftKeyTracker } from './input.js'

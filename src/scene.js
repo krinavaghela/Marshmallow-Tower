@@ -1,5 +1,4 @@
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { THREE, OrbitControls } from './three-deps.js'
 
 export function createScene() {
   const scene = new THREE.Scene()
