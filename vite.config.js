@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 
-// Use relative URLs so GitHub Pages project sites work (e.g. /repo-name/ not site root).
 export default defineConfig({
-  base: './',
+  // GitHub Pages project site base path MUST match repo name.
+  base: '/Marshmallow-Tower/',
   server: {
     port: 5173,
     strictPort: true,
